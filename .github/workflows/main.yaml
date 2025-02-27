@@ -26,6 +26,13 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install smtplib
+        pip install datetime
+        pip install FPDF   
+        pip install load_dotenv
+        pip install requests   
+        pip install reportlab python-dotenv requests
+
     - name: Rodar código Python
       run: |
         python scripts/main.py
