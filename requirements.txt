@@ -1,4 +1,3 @@
 pandas
 python-whois
-smtplib
 python-dotenv
