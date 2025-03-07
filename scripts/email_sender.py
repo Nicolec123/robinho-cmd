@@ -1,28 +1,42 @@
 import os
 import base64
 import requests
-from dotenv import load_dotenv
-load_dotenv()  # Isso carrega as variáveis do arquivo .env para o ambiente
-
-
+ 
+def obter_novo_token():
+    """
+    Obtém um novo token de autenticação com credenciais fixas.
+    """
+    url_auth = "https://notifications-api.mobileng.com.br/auth"  
+    payload = {
+        "username": "contato_sender",  
+        "password": "Cont@to#Sender2025"  
+    }
+   
+    try:
+        response = requests.post(url_auth, json=payload)
+        if response.ok:
+            return response.json().get("token")  
+        else:
+            print("Erro ao obter novo token:", response.status_code, response.text)
+            return None
+    except Exception as e:
+        print(f"Erro durante a obtenção do token: {e}")
+        return None
+ 
+ 
 def enviar_email_api(destinatario, assunto, mensagem, caminho_arquivo_pdf):
     """
     Envia um e-mail com o PDF em anexo utilizando a API da Mobileng.
-    O token de autenticação é obtido a partir da variável de ambiente MOBILENG_TOKEN.
-    
-    Args:
-        destinatario (str): E-mail do destinatário.
-        assunto (str): Assunto do e-mail.
-        mensagem (str): Corpo do e-mail.
-        caminho_arquivo_pdf (str): Caminho para o arquivo PDF a ser anexado.
+    Obtém um novo token de autenticação antes de cada envio.
     """
-    token = os.environ.get("MOBILENG_TOKEN")
+    token = obter_novo_token()  # Gera um novo token para cada envio
+ 
     if not token:
-        print("Erro: A variável de ambiente MOBILENG_TOKEN não está definida.")
+        print("Erro: Não foi possível obter um token de autenticação.")
         return
-
-    url = "https://notifications-api.mobileng.com.br/mail/send_email" # API QUE MANDA O EMAIL
-
+ 
+    url = "https://notifications-api.mobileng.com.br/mail/send_email"
+ 
     # Lê o arquivo PDF e o codifica em base64 para envio
     try:
         with open(caminho_arquivo_pdf, "rb") as f:
@@ -30,14 +44,14 @@ def enviar_email_api(destinatario, assunto, mensagem, caminho_arquivo_pdf):
     except Exception as e:
         print(f"Erro ao ler o arquivo PDF: {e}")
         return
-
-    pdf_b64 = base64.b64encode(pdf_data).decode('utf-8') # TIPO QUE A API DO EMIAL ACEITA
-
-    # Monta o payload do e-mail, incluindo o anexo
+ 
+    pdf_b64 = base64.b64encode(pdf_data).decode('utf-8')
+ 
+    # Monta o payload do e-mail
     data = {
         "from": {
             "email": "noreply@beneficiocerto.com.br",
-            "name": "Alerta de Dominios!"
+            "name": "Alerta de Domínios!"
         },
         "subject": assunto,
         "body": {
@@ -46,23 +60,23 @@ def enviar_email_api(destinatario, assunto, mensagem, caminho_arquivo_pdf):
         },
         "recipients": [
             {
-                "email": destinatario,# TÁ TUDO MAIS ABAIXO REFERENTE AS CONFIGURAÇÕES
+                "email": destinatario,
                 "name": destinatario  
             }
         ],
         "attachments": [
             {
-             "filename": os.path.basename(caminho_arquivo_pdf), # essa parte é do pdf que é enviado por email, cuidado!
-             "base64": pdf_b64  
+                "filename": os.path.basename(caminho_arquivo_pdf),
+                "base64": pdf_b64  
             }
         ]
     }
-
+ 
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {token}"
     }
-
+ 
     try:
         response = requests.post(url, json=data, headers=headers)
         if response.ok:
@@ -71,12 +85,13 @@ def enviar_email_api(destinatario, assunto, mensagem, caminho_arquivo_pdf):
             print("Erro ao enviar e-mail:", response.status_code, response.text)
     except Exception as e:
         print(f"Erro durante o envio do e-mail: {e}")
-
-# Enviar Email(CONFIGURAÇÕES):
+ 
+ 
+# Enviar Email
 if __name__ == "__main__":
-    destinatario = "tecnologia@beneficiocerto.com.br"  # E-mail de destino
+    destinatario = "danielefloripa42@gmail.com"
     assunto = "Relatório de Domínios"
     mensagem = "Olá,\n\nSegue em anexo o relatório de domínios.\n\nAtenciosamente."
-    caminho_arquivo_pdf = "relatorio_dominios.pdf"  # Caminho para o arquivo PDF gerado
-
+    caminho_arquivo_pdf = "relatorio_dominios.pdf"
+ 
     enviar_email_api(destinatario, assunto, mensagem, caminho_arquivo_pdf)
