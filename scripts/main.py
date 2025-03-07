@@ -52,6 +52,8 @@ def gerar_relatorio_pdf(dominios_info):
         c.drawString(100, y, f"Status: {dominio_info['status']}")
         y -= espacamento
         c.drawString(100, y, f"Dias restantes: {dominio_info['dias_restantes']}")
+        y -= espacamento  
+        c.drawString(100, y, f"Código: {dominio_info['handle']}")
         y -= espacamento * 2  # Espaço extra entre blocos de domínios
 
     c.save()
@@ -83,7 +85,7 @@ def main():
             print(f"Data de expiração registrada (CSV): {data_expiracao_csv}")
 
             # Recebe status, dias restantes e a data de expiração obtida via API
-            status_api, dias_restantes, expiration_date_api = check_whois(dominio, data_expiracao_csv)
+            status_api, dias_restantes, expiration_date_api,handle= check_whois(dominio, data_expiracao_csv)
 
             # Se a data da API estiver disponível, usamos; caso contrário, mantemos a do CSV
             data_expiracao = expiration_date_api if expiration_date_api else data_expiracao_csv
@@ -107,7 +109,8 @@ def main():
                 "data_expiracao": data_expiracao,
                 "status": status_text,
                 "dias_restantes": dias_text,
-                "dias_numericos": dias_numericos
+                "dias_numericos": dias_numericos,
+                "handle": handle
             })
 
         # Ordena a lista de domínios com base na quantidade de dias (do menor para o maior)
@@ -138,3 +141,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
