@@ -89,7 +89,7 @@ def enviar_email_api(destinatario, assunto, mensagem, caminho_arquivo_pdf):
  
 # Enviar Email
 if __name__ == "__main__":
-    destinatario = "danielefloripa42@gmail.com"
+    destinatario = "tecnologia@beneficiocerto.com.br"
     assunto = "Relatório de Domínios"
     mensagem = "Olá,\n\nSegue em anexo o relatório de domínios.\n\nAtenciosamente."
     caminho_arquivo_pdf = "relatorio_dominios.pdf"
