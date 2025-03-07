@@ -9,8 +9,12 @@ def check_whois(dominio, data_expiracao):
         response = requests.get(url)
 
         if response.status_code == 200:
-            print("Requisição bem-sucedida. Processando dados...")
+            print("Requisição bem-sucedida. Processando dados...") 
             data = response.json()
+            print(data)
+
+            # Obtendo o handle
+            handle = data.get("entities", [{}])[1].get("handle", "Não encontrado")
 
             expiration_event = next(
                 (event for event in data.get("events", []) if event.get("eventAction", "").upper() == "EXPIRATION"),
@@ -19,12 +23,12 @@ def check_whois(dominio, data_expiracao):
 
             if not expiration_event:
                 print(f"Erro: Não foi possível encontrar a data de expiração para {dominio}.")
-                return False, None, None
+                return False, None, None, handle
 
             expiration_date_str = expiration_event.get("eventDate")
             if not expiration_date_str:
                 print(f"Erro: A data de expiração está ausente para {dominio}.")
-                return False, None, None
+                return False, None, None, handle
 
             # Converte a string ISO para um objeto datetime
             expiration_date = datetime.strptime(expiration_date_str, "%Y-%m-%dT%H:%M:%SZ")
@@ -34,11 +38,12 @@ def check_whois(dominio, data_expiracao):
             # Converte para o formato brasileiro (dd/mm/aaaa HH:MM:SS)
             expiration_date_br = expiration_date.strftime("%d/%m/%Y %H:%M:%S")
 
-            return dias_restantes <= 30, dias_restantes, expiration_date_br
+            return dias_restantes <= 30, dias_restantes, expiration_date_br, handle
         else:
             print(f"Erro ao consultar domínio {dominio}: Código HTTP {response.status_code}")
-            return False, None, None
-
+            return False, None, None, None
+        
     except Exception as e:
         print(f"Erro ao verificar domínio {dominio}: {e}")
-        return False, None, None
+        return False, None, None, None
+
